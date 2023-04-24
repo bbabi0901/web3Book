@@ -2,7 +2,7 @@
 
 - FE
 
-  typescript, antd, recoil, web3.js
+  react, typescript, antd, recoil, web3.js
 
 - Smart contract
 
