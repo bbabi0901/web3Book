@@ -91,9 +91,4 @@ export const styles = {
   radius_16: '40px',
   radius_17: '50px',
   radius_18: '60px',
-
-  /* Image */
-  // card_BTC: require('../../assets/img/BTC_Card_bg.jpeg'),
-  // card_ETH: require('../../assets/img/ETH_Card_bg.jpg'),
-  // card_LINK: require('../../assets/img/LINK_Card_bg.png'),
 };
