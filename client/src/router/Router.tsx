@@ -16,7 +16,7 @@ import { AbiItem } from 'web3-utils';
 import NotFound from '../pages/NotFound';
 
 // abi
-// import { bookFactoryAbi, bookFactoryAddr } from '../assets/abi/BookFactory';
+import { bookFactoryAbi, bookFactoryAddr } from '../assets/abi/BookFactory';
 
 const Router: React.FC = () => {
   const [web3, setWeb3] = useState<Web3 | null>(null);
@@ -25,11 +25,11 @@ const Router: React.FC = () => {
     const web = new Web3(Web3.givenProvider || 'https://localhost:8545');
     setWeb3(web);
 
-    // const contract = new web.eth.Contract(
-    //   bookFactoryAbi as AbiItem[],
-    //   bookFactoryAddr,
-    // );
-    // setBookFactory(contract);
+    const contract = new web.eth.Contract(
+      bookFactoryAbi as AbiItem[],
+      bookFactoryAddr,
+    );
+    setBookFactory(contract);
   }, []);
 
   return (

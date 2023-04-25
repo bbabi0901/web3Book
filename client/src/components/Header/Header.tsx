@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRecoilState } from 'recoil';
 
 // antd
-import { Layout, Menu as _Menu, Row, Col, Input, Form } from 'antd';
+import { Layout, Menu as _Menu, Row, Col, Input, Divider } from 'antd';
 import type { MenuProps } from 'antd';
 import { WalletOutlined } from '@ant-design/icons';
 
@@ -78,13 +78,9 @@ const Nav: React.FC = () => {
         <Col md={2}>
           <Link to="/">HomeHome</Link>
         </Col>
-        <Col md={5} style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <Menu
-            mode="horizontal"
-            style={{ justifyContent: 'flex-end' }}
-            items={items}
-            onClick={onMenuClick}
-          />
+        <Divider type="vertical" style={{ borderLeft: '1px solid white' }} />
+        <Col md={5} style={{ display: 'flex', justifyContent: 'center' }}>
+          <Menu mode="horizontal" items={items} onClick={onMenuClick} />
         </Col>
         <Col md={11}>
           <Search
