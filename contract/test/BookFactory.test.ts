@@ -8,6 +8,7 @@ import {
 } from '../typechain-types';
 
 const { expectRevert } = require('@openzeppelin/test-helpers');
+import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
 describe('BookFactory', function () {
   /*
@@ -26,12 +27,27 @@ describe('BookFactory', function () {
   let book: IBook;
   let snapshotId: any;
 
+  // accounts
+  let deployer, writer: SignerWithAddress;
+
   before(async () => {
     BookFactory = await ethers.getContractFactory('BookFactory');
     bookFactory = await BookFactory.deploy();
     await bookFactory.deployed();
 
     Book = await ethers.getContractFactory('Book');
+
+    const [owner, addr1] = await ethers.getSigners();
+    deployer = owner;
+    writer = addr1;
+
+    console.log(`
+    Accounts
+    -----------------------------------------------------------
+    Contract Addr : ${bookFactory.address}
+    Deployer Addr : ${deployer.address}
+    Writer   Addr : ${writer.address}
+    `);
   });
 
   beforeEach(async () => {
@@ -43,9 +59,22 @@ describe('BookFactory', function () {
   });
 
   describe('Book Factory', function () {
-    it('Should set the right address of Contract of Book', async () => {});
+    it('Should set the right address of Book Contract', async () => {});
 
-    it('Should set the right ownedBook', async () => {});
+    it('Should set the right ownedBook', async () => {
+      // publish
+      const sampleTitle = 'Sample Title';
+      const tx = await bookFactory.connect(writer).publish(sampleTitle);
+      const receipt = await tx.wait();
+      const publishEvent = receipt.events?.filter((e) => {
+        return e.event === 'Publish';
+      })[0];
+      const args = publishEvent?.args;
+
+      const ownedBook = await bookFactory.ownedBook(writer.address);
+
+      expect(args?.book).to.equal(ownedBook[ownedBook.length - 1]);
+    });
   });
 
   describe('Book', function () {

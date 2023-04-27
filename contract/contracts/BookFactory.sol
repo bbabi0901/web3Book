@@ -12,7 +12,7 @@ contract BookFactory {
   mapping(address => Book[]) private _ownedBook;
   mapping(uint256 => Book) public books;
 
-  event Publish(uint256 bookId);
+  event Publish(uint256 bookId, address book);
 
   function publish(string memory title) external returns (uint256) {
     uint256 newBookId = _bookId.current();
@@ -22,7 +22,7 @@ contract BookFactory {
 
     _bookId.increment();
 
-    emit Publish(newBookId);
+    emit Publish(newBookId, address(book));
     return newBookId;
   }
 
