@@ -7,7 +7,15 @@ import { useRecoilState } from 'recoil';
 // antd
 import { Layout, Menu as _Menu, Row, Col, Input, Divider } from 'antd';
 import type { MenuProps } from 'antd';
-import { WalletOutlined } from '@ant-design/icons';
+import {
+  WalletOutlined,
+  UserOutlined,
+  BookOutlined,
+  EditOutlined,
+  HighlightOutlined,
+  ProfileOutlined,
+  TableOutlined,
+} from '@ant-design/icons';
 
 // styles
 import styled from 'styled-components';
@@ -35,17 +43,21 @@ function getItem(
   } as MenuItem;
 }
 
-const items: MenuItem[] = [
-  getItem('Library', 'library'),
-  getItem('Write', 'write', null, [
-    getItem('Publish', 'publish'),
-    getItem('New Page', 'newpage'),
-    getItem('Rewrite', 'rewrite'),
+const library: MenuItem[] = [getItem('Library', 'library')];
+
+const book: MenuItem[] = [
+  getItem('Write Your Book', 'write', null, [
+    getItem('Publish', 'publish', <BookOutlined />),
+    getItem('New Page', 'newpage', <EditOutlined />),
+    getItem('Rewrite', 'rewrite', <HighlightOutlined />),
   ]),
 ];
 
 const profile: MenuItem[] = [
-  getItem('MyPage', 'mypage'),
+  getItem('', 'mypage', <UserOutlined />, [
+    getItem('Profile', 'profile', <ProfileOutlined />),
+    getItem('My Collections', 'mycollections', <TableOutlined />),
+  ]),
   getItem('', 'wallet', <WalletOutlined />),
 ];
 
@@ -75,12 +87,19 @@ const Nav: React.FC = () => {
   return (
     <Header style={{ textAlign: 'center' }}>
       <Row wrap={false} justify="start" align="middle" gutter={{ md: 24 }}>
-        <Col md={2}>
-          <Link to="/">HomeHome</Link>
+        <Col md={3}>
+          <Link to="/" style={{ fontWeight: 'bold' }}>
+            Web3Book
+          </Link>
         </Col>
         <Divider type="vertical" style={{ borderLeft: '1px solid white' }} />
-        <Col md={5} style={{ display: 'flex', justifyContent: 'center' }}>
-          <Menu mode="horizontal" items={items} onClick={onMenuClick} />
+        <Col md={3}>
+          <Menu
+            mode="horizontal"
+            style={{ justifyContent: 'center' }}
+            items={library}
+            onClick={onMenuClick}
+          />
         </Col>
         <Col md={11}>
           <Search
@@ -93,10 +112,18 @@ const Nav: React.FC = () => {
             placeholder="Enter contracts / accounts address..."
           />
         </Col>
-        <Col md={6}>
+        <Col md={4}>
           <Menu
             mode="horizontal"
-            style={{ justifyContent: 'flex-end' }}
+            style={{ justifyContent: 'center' }}
+            items={book}
+            onClick={onMenuClick}
+          />
+        </Col>
+        <Col md={3}>
+          <Menu
+            mode="horizontal"
+            style={{ justifyContent: 'center' }}
             items={profile}
             onClick={onMenuClick}
           />
@@ -124,9 +151,11 @@ const Search = styled(_Search)`
 `;
 
 const Menu = styled(_Menu)`
-  background-color: rgba(255, 255, 255, 0);
+  font-weight: bold;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: ${styles.radius_5};
   color: ${styles.white};
-  margin: 0 5%;
+  margin: 10% 5%;
 `;
 
 export default Nav;
