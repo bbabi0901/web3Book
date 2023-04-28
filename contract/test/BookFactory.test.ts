@@ -84,12 +84,13 @@ describe('BookFactory', function () {
       if (bookId !== undefined) {
         bookAddr = await bookFactory.books(bookId);
       }
+
       expect(bookAddr).to.equal(book);
     });
 
     it('Should set the right ownedBook', async () => {
       // publish
-      const { book } = await publish('Sample Title');
+      const { bookId, book } = await publish('Sample Title');
       const ownedBook = await bookFactory.ownedBook(writer.address);
 
       expect(book).to.equal(ownedBook[ownedBook.length - 1]);
@@ -98,9 +99,27 @@ describe('BookFactory', function () {
 
   describe('Book', function () {
     describe('Publish', function () {
-      it('Should set the right author', async () => {});
+      it('Should set the right author', async () => {
+        let bookContract: IBook | any;
+        const { book } = await publish('Sample Title');
+        if (book) {
+          bookContract = Book.attach(book);
+        }
+        const author = await bookContract.author();
 
-      it('Should set the right title', async () => {});
+        expect(author).to.equal(writer.address);
+      });
+
+      it('Should set the right title', async () => {
+        let bookContract: IBook | any;
+        const { book } = await publish('Sample Title');
+        if (book) {
+          bookContract = Book.attach(book);
+        }
+        const title = await bookContract.name();
+
+        expect(title).to.equal('Sample Title');
+      });
     });
 
     describe('Write', function () {
