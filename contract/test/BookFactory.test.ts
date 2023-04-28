@@ -29,6 +29,7 @@ describe('BookFactory', function () {
   let deployer, writer: SignerWithAddress, notWriter: SignerWithAddress;
 
   const ERR_NOT_AUTHORIZED = 'Not AUTHORized!';
+  const ERR_TOKEN_NON_EXISTS = 'ERC721URIStorage: URI set of nonexistent token';
 
   before(async () => {
     BookFactory = await ethers.getContractFactory('BookFactory');
@@ -78,9 +79,16 @@ describe('BookFactory', function () {
   };
 
   describe('Book Factory', function () {
+    it('Should emit the right event with args', async () => {
+      await expect(bookFactory.connect(writer).publish('Sample Title')).to.emit(
+        bookFactory,
+        'Publish',
+      );
+    });
+
     it('Should set the right address of Book Contract', async () => {
       let bookAddr: string = '';
-      const { bookId, book } = await publish('Harry Potter');
+      const { bookId, book } = await publish('Sample Title');
       if (bookId !== undefined) {
         bookAddr = await bookFactory.books(bookId);
       }
@@ -133,13 +141,11 @@ describe('BookFactory', function () {
     });
 
     describe('Write', function () {
-      it('Should revert when not authorized', async () => {
+      it('Should emit the right event with args', async () => {
         await expect(
-          bookContract.connect(notWriter).write(SAMPLE_TOKEN_URI),
-        ).to.be.revertedWith(ERR_NOT_AUTHORIZED);
+          bookContract.connect(writer).write(SAMPLE_TOKEN_URI),
+        ).to.emit(bookContract, 'Write');
       });
-
-      it('Should set the right page', async () => {});
 
       it('Should set the right token URI', async () => {
         let tokenURI = '';
@@ -149,16 +155,48 @@ describe('BookFactory', function () {
         }
         expect(tokenURI).to.equal(SAMPLE_TOKEN_URI);
       });
+
+      it('Should revert when not authorized', async () => {
+        await expect(
+          bookContract.connect(notWriter).write(SAMPLE_TOKEN_URI),
+        ).to.be.revertedWith(ERR_NOT_AUTHORIZED);
+      });
     });
 
     describe('Rewrite', function () {
+      const NEW_TOKEN_URI =
+        'https://ipfs.io/ipfs/QmXfo3dP665Km2eTEVVVPyiy9tX6TS4Q7Gmp4TPrV1RKnq/100';
+      let page: number;
+      beforeEach(async () => {
+        const newPage = await write(SAMPLE_TOKEN_URI);
+        if (newPage !== undefined) {
+          page = +newPage;
+        }
+      });
+
+      it('Should emit the right event with args', async () => {
+        await expect(
+          bookContract.connect(writer).rewrite(page, NEW_TOKEN_URI),
+        ).to.emit(bookContract, 'Rewrite');
+      });
+
+      it('Should set the right token URI', async () => {
+        await bookContract.connect(writer).rewrite(page, NEW_TOKEN_URI);
+        const tokenURI = await bookContract.tokenURI(page);
+        expect(tokenURI).to.equal(NEW_TOKEN_URI);
+      });
+
       it('Should revert when not authorized', async () => {
         await expect(
-          bookContract.connect(notWriter).rewrite(0, SAMPLE_TOKEN_URI),
+          bookContract.connect(notWriter).rewrite(page, NEW_TOKEN_URI),
         ).to.be.revertedWith(ERR_NOT_AUTHORIZED);
       });
 
-      it('Should set the right token URI', async () => {});
+      it('Should revert when page not exists', async () => {
+        await expect(
+          bookContract.connect(writer).rewrite(100, NEW_TOKEN_URI),
+        ).to.be.revertedWith(ERR_TOKEN_NON_EXISTS);
+      });
     });
   });
 });
