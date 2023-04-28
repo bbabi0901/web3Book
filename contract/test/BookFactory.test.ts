@@ -28,6 +28,8 @@ describe('BookFactory', function () {
   // accounts
   let deployer, writer: SignerWithAddress, notWriter: SignerWithAddress;
 
+  const ERR_NOT_AUTHORIZED = 'Not AUTHORized!';
+
   before(async () => {
     BookFactory = await ethers.getContractFactory('BookFactory');
     bookFactory = await BookFactory.deploy();
@@ -96,6 +98,18 @@ describe('BookFactory', function () {
 
   describe('Book', function () {
     const SAMPLE_TITLE = 'Sample Title';
+    const SAMPLE_TOKEN_URI =
+      'https://ipfs.io/ipfs/bafybeifjo6jp6zvxudgvrtlrrupcgl4qrn6li4nu7di2uyhk73mt2qbccy';
+
+    const write = async (tokenURI: string) => {
+      const tx = await bookContract.connect(writer).write(tokenURI);
+      const receipt = await tx.wait();
+      const writeEvent = receipt.events?.filter((e) => {
+        return e.event === 'Write';
+      })[0];
+      const page = writeEvent?.args;
+      return page;
+    };
 
     beforeEach(async () => {
       const { book } = await publish(SAMPLE_TITLE);
@@ -119,15 +133,30 @@ describe('BookFactory', function () {
     });
 
     describe('Write', function () {
-      it('Should revert when not authorized', async () => {});
+      it('Should revert when not authorized', async () => {
+        await expect(
+          bookContract.connect(notWriter).write(SAMPLE_TOKEN_URI),
+        ).to.be.revertedWith(ERR_NOT_AUTHORIZED);
+      });
 
       it('Should set the right page', async () => {});
 
-      it('Should set the right token URI', async () => {});
+      it('Should set the right token URI', async () => {
+        let tokenURI = '';
+        const page = await write(SAMPLE_TOKEN_URI);
+        if (page !== undefined) {
+          tokenURI = await bookContract.tokenURI(+page);
+        }
+        expect(tokenURI).to.equal(SAMPLE_TOKEN_URI);
+      });
     });
 
     describe('Rewrite', function () {
-      it('Should revert when not authorized', async () => {});
+      it('Should revert when not authorized', async () => {
+        await expect(
+          bookContract.connect(notWriter).rewrite(0, SAMPLE_TOKEN_URI),
+        ).to.be.revertedWith(ERR_NOT_AUTHORIZED);
+      });
 
       it('Should set the right token URI', async () => {});
     });

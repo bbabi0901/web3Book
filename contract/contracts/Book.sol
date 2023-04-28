@@ -18,7 +18,6 @@ contract Book is ERC721URIStorage {
   }
 
   function write(string memory tokenURI) external isAuthor returns (uint256) {
-    require(author == msg.sender, 'Not AUTHORized!');
     uint256 newPage = _page.current();
     _mint(msg.sender, newPage);
     _setTokenURI(newPage, tokenURI);
@@ -33,8 +32,6 @@ contract Book is ERC721URIStorage {
     uint256 page,
     string memory newURI
   ) external isAuthor returns (bool) {
-    require(author == msg.sender, 'Not AUTHORized!');
-
     _setTokenURI(page, newURI);
 
     emit Rewrite(page);
