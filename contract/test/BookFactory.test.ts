@@ -6,9 +6,10 @@ import {
   Book as IBook,
   Book__factory,
 } from '../typechain-types';
-
-const { expectRevert } = require('@openzeppelin/test-helpers');
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
+
+const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
+// const { expectRevert } = require('@openzeppelin/test-helpers');
 
 describe('BookFactory', function () {
   /*
@@ -58,22 +59,40 @@ describe('BookFactory', function () {
     await ethers.provider.send('evm_revert', [snapshotId]);
   });
 
+  const publish = async (title: string) => {
+    let bookId: number | undefined = undefined;
+    let book: string | undefined = undefined;
+
+    const tx = await bookFactory.connect(writer).publish(title);
+    const receipt = await tx.wait();
+    const publishEvent = receipt.events?.filter((e) => {
+      return e.event === 'Publish';
+    })[0];
+    const args = publishEvent?.args;
+    if (args) {
+      bookId = +args.bookId;
+      book = args.book;
+    }
+
+    return { bookId, book };
+  };
+
   describe('Book Factory', function () {
-    it('Should set the right address of Book Contract', async () => {});
+    it('Should set the right address of Book Contract', async () => {
+      let bookAddr: string = '';
+      const { bookId, book } = await publish('Harry Potter');
+      if (bookId !== undefined) {
+        bookAddr = await bookFactory.books(bookId);
+      }
+      expect(bookAddr).to.equal(book);
+    });
 
     it('Should set the right ownedBook', async () => {
       // publish
-      const sampleTitle = 'Sample Title';
-      const tx = await bookFactory.connect(writer).publish(sampleTitle);
-      const receipt = await tx.wait();
-      const publishEvent = receipt.events?.filter((e) => {
-        return e.event === 'Publish';
-      })[0];
-      const args = publishEvent?.args;
-
+      const { book } = await publish('Sample Title');
       const ownedBook = await bookFactory.ownedBook(writer.address);
 
-      expect(args?.book).to.equal(ownedBook[ownedBook.length - 1]);
+      expect(book).to.equal(ownedBook[ownedBook.length - 1]);
     });
   });
 
