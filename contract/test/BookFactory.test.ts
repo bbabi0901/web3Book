@@ -8,9 +8,6 @@ import {
 } from '../typechain-types';
 import { SignerWithAddress } from '@nomiclabs/hardhat-ethers/signers';
 
-const { loadFixture } = require('@nomicfoundation/hardhat-network-helpers');
-// const { expectRevert } = require('@openzeppelin/test-helpers');
-
 describe('BookFactory', function () {
   /*
   * evm_snapshot
@@ -25,11 +22,11 @@ describe('BookFactory', function () {
   let BookFactory: BookFactory__factory;
   let bookFactory: IBookFactory;
   let Book: Book__factory;
-  let book: IBook;
+  let bookContract: IBook;
   let snapshotId: any;
 
   // accounts
-  let deployer, writer: SignerWithAddress;
+  let deployer, writer: SignerWithAddress, notWriter: SignerWithAddress;
 
   before(async () => {
     BookFactory = await ethers.getContractFactory('BookFactory');
@@ -38,9 +35,10 @@ describe('BookFactory', function () {
 
     Book = await ethers.getContractFactory('Book');
 
-    const [owner, addr1] = await ethers.getSigners();
+    const [owner, addr1, addr2] = await ethers.getSigners();
     deployer = owner;
     writer = addr1;
+    notWriter = addr2;
 
     console.log(`
     Accounts
@@ -89,7 +87,6 @@ describe('BookFactory', function () {
     });
 
     it('Should set the right ownedBook', async () => {
-      // publish
       const { bookId, book } = await publish('Sample Title');
       const ownedBook = await bookFactory.ownedBook(writer.address);
 
@@ -98,27 +95,26 @@ describe('BookFactory', function () {
   });
 
   describe('Book', function () {
+    const SAMPLE_TITLE = 'Sample Title';
+
+    beforeEach(async () => {
+      const { book } = await publish(SAMPLE_TITLE);
+      if (book) {
+        bookContract = Book.attach(book);
+      }
+    });
+
     describe('Publish', function () {
       it('Should set the right author', async () => {
-        let bookContract: IBook | any;
-        const { book } = await publish('Sample Title');
-        if (book) {
-          bookContract = Book.attach(book);
-        }
         const author = await bookContract.author();
 
         expect(author).to.equal(writer.address);
       });
 
       it('Should set the right title', async () => {
-        let bookContract: IBook | any;
-        const { book } = await publish('Sample Title');
-        if (book) {
-          bookContract = Book.attach(book);
-        }
         const title = await bookContract.name();
 
-        expect(title).to.equal('Sample Title');
+        expect(title).to.equal(SAMPLE_TITLE);
       });
     });
 
