@@ -2,8 +2,13 @@
 
 - FE
 
-  react, typescript, antd, recoil, web3.js
+  Next, Typescript, zustand, ethers.js, wagmi
+
+- BE
+  Node.js, Typescript, Prisma
 
 - Smart contract
 
-  Solidity, typescript, hardhat, ethers.js
+  Solidity, Typescript, Hardhat, ethers.js
+
+
